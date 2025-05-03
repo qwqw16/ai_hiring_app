@@ -6,17 +6,16 @@ import re
 from langdetect import detect
 from utils import extract_text_from_pdf, compute_offer
 
-# ✅ 加载本地 .env 文件并显式传递 API 密钥（兼容部署环境）
+# ✅ 加载 .env 文件并设置 API 密钥
 load_dotenv()
-client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
-
-# 页面设置
+# ✅ 页面设置
 st.set_page_config(page_title="AI Hiring Assistant", layout="centered")
 st.title("🤖 AI Hiring Assistant")
 st.markdown("**Position:** Data Analyst  **Salary Range:** Up to $90,000")
 
-# 上传简历
+# ✅ 上传简历
 uploaded_file = st.file_uploader("📄 Upload your resume (PDF)", type="pdf")
 
 if uploaded_file:
@@ -26,16 +25,14 @@ if uploaded_file:
     with st.expander("📄 Resume Preview (first 500 characters)"):
         st.write(resume_text)
 
-    # 自动识别语言
     lang = detect(resume_text)
     lang_label = "Chinese" if lang.startswith("zh") else "English"
-
     job_desc = "We are hiring a Data Analyst with skills in data analysis, Python, and SQL."
 
-    # ===== 简历匹配评分 =====
+    # ✅ 简历评分
     st.markdown("### 🔍 Resume Match Score")
     with st.spinner("AI is evaluating..."):
-        response = client.chat.completions.create(
+        response = openai.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are a professional recruiter."},
@@ -65,8 +62,8 @@ Resume Content (in {lang_label}):
     else:
         st.success("🎉 Resume passed! Proceeding to the interview...")
 
-        # ===== 面试问题生成 =====
-        response_q = client.chat.completions.create(
+        # ✅ 生成面试问题
+        response_q = openai.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are a recruiter."},
@@ -77,12 +74,12 @@ Resume Content (in {lang_label}):
         st.markdown("### 📋 Interview Questions")
         st.write(questions)
 
-        # ===== 用户回答 =====
+        # ✅ 候选人回答
         answer = st.text_area("🗣️ Please answer the above interview questions:", height=200)
 
         if st.button("Submit Answer") and "eval_done" not in st.session_state:
             with st.spinner("AI is scoring your response..."):
-                eval_response = client.chat.completions.create(
+                eval_response = openai.chat.completions.create(
                     model="gpt-3.5-turbo",
                     messages=[
                         {"role": "system", "content": "You are an interview evaluator."},
@@ -121,23 +118,15 @@ Candidate's Answer:
 
                     if expected <= offer:
                         st.success(f"🎉 Congratulations! You are hired. Final salary: ${expected}")
+                        st.balloons()
                     else:
                         st.error("❌ Sorry, your expected salary exceeds our offer limit.")
                         st.markdown(f"💡 Based on your score, we can offer up to **${offer}**.")
 
-                        # ===== 福利包推荐 =====
+                        # ✅ 福利推荐
                         st.markdown("### 🎁 Additional Benefits Included in the Offer:")
 
-                        if interview_score >= 10:
-                            benefits = [
-                                "🏡 Full Remote Work",
-                                "🌴 20 Days Paid Annual Leave",
-                                "💰 $5,000 Signing Bonus",
-                                "📈 Stock Options (Equity Plan)",
-                                "🎓 $2,000 Personal Learning Budget"
-                            ]
-                            hr_pitch = "Given your outstanding performance, we're happy to extend our premium benefits package to you."
-                        elif interview_score >= 8:
+                        if interview_score >= 8:
                             benefits = [
                                 "🏡 Hybrid Remote Work",
                                 "🌴 15 Days Annual Leave",
@@ -156,15 +145,13 @@ Candidate's Answer:
                         for b in benefits:
                             st.markdown(f"- {b}")
 
-                        # ===== 确认是否接受公司 offer =====
+                        # ✅ 接受 or 拒绝 offer
                         st.markdown("### 🤝 Would you be willing to accept this offer?")
                         col1, col2 = st.columns(2)
-
                         with col1:
                             if st.button("✅ Accept Offer"):
                                 st.success(f"🎉 Welcome aboard! Your final salary is **${offer}**.")
                                 st.balloons()
-
                         with col2:
                             if st.button("❌ Decline Offer"):
                                 st.warning("💔 We're sorry we couldn't work together. Best wishes!")

@@ -26,28 +26,7 @@
 
 ---
 
-## 📦 安装使用方法
-
-### 1. 克隆项目
-```
-git clone https://github.com/qwqw16/ai_hiring_app.git
-cd ai_hiring_app
-```
-
-### 2. 安装依赖
-```
-pip install -r requirements.txt
-```
-
-### 3. 配置 API 密钥
-在项目根目录下新建 .env 文件，写入以下内容（替换为你自己的 OpenAI Key）：
-OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
 ## 🚀 本地运行
-```
-streamlit run app.py
-```
-
 
 
 
