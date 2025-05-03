@@ -1,5 +1,4 @@
 import streamlit as st
-from dotenv import load_dotenv
 import openai
 import os
 import re
@@ -7,7 +6,7 @@ from langdetect import detect
 from utils import extract_text_from_pdf, compute_offer
 
 # 加载 API 密钥
-load_dotenv()
+openai.api_key = os.getenv("OPENAI_API_KEY")
 client = openai.OpenAI()
 
 # 页面设置
