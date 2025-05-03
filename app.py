@@ -1,16 +1,16 @@
 import streamlit as st
 from dotenv import load_dotenv
-from openai import OpenAI
+from openai import OpenAI  # ✅ 正确写法
 import os
 import re
 from langdetect import detect
 from utils import extract_text_from_pdf, compute_offer
 
-# ✅ 加载 .env 文件并设置 API 密钥
+# ✅ 加载 API Key
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# ✅ 页面设置
+# ✅ Streamlit 页面设置
 st.set_page_config(page_title="AI Hiring Assistant", layout="centered")
 st.title("🤖 AI Hiring Assistant")
 st.markdown("**Position:** Data Analyst  **Salary Range:** Up to $90,000")
@@ -52,6 +52,8 @@ Resume Content (in {lang_label}):
         )
         score_text = response.choices[0].message.content.strip()
         st.write(score_text)
+
+
 
     match = re.search(r'\b(10|[1-9])\b', score_text[:30])
     match_score = int(match.group(1)) if match else st.slider("❓ Score not detected. Select manually:", 1, 10)
