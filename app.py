@@ -1,12 +1,12 @@
 import streamlit as st
+import openai
 import os
 import re
 from langdetect import detect
-from openai import OpenAI
 from utils import extract_text_from_pdf, compute_offer
 
-# 初始化新版 OpenAI 客户端
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# 设置 API 密钥（新版 SDK 直接使用 openai.api_key）
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # 页面设置
 st.set_page_config(page_title="AI Hiring Assistant", layout="centered")
@@ -30,7 +30,7 @@ if uploaded_file:
 
     st.markdown("### 🔍 Resume Match Score")
     with st.spinner("AI is evaluating..."):
-        response = client.chat.completions.create(
+        response = openai.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are a professional recruiter."},
@@ -60,7 +60,7 @@ Resume Content (in {lang_label}):
     else:
         st.success("🎉 Resume passed! Proceeding to the interview...")
 
-        response_q = client.chat.completions.create(
+        response_q = openai.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are a recruiter."},
@@ -75,7 +75,7 @@ Resume Content (in {lang_label}):
 
         if st.button("Submit Answer") and "eval_done" not in st.session_state:
             with st.spinner("AI is scoring your response..."):
-                eval_response = client.chat.completions.create(
+                eval_response = openai.chat.completions.create(
                     model="gpt-3.5-turbo",
                     messages=[
                         {"role": "system", "content": "You are an interview evaluator."},
@@ -114,6 +114,7 @@ Candidate's Answer:
 
                     if expected <= offer:
                         st.success(f"🎉 Congratulations! You are hired. Final salary: ${expected}")
+                        st.balloons()
                     else:
                         st.error("❌ Sorry, your expected salary exceeds our offer limit.")
                         st.markdown(f"💡 Based on your score, we can offer up to **${offer}**.")
