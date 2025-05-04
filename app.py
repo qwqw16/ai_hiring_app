@@ -10,8 +10,7 @@ from utils import extract_text_from_pdf, compute_offer
 os.environ["NO_PROXY"] = "api.openai.com" 
 
 # ✅ 安全加载环境变量
-load_dotenv()  
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 # ✅ Streamlit 页面设置
 st.set_page_config(page_title="AI Hiring Assistant", layout="centered",initial_sidebar_state="collapsed")
