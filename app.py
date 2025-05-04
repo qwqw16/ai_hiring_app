@@ -1,17 +1,20 @@
 import streamlit as st
 from dotenv import load_dotenv
-from openai import OpenAI  # ✅ 正确写法
+from openai import OpenAI
 import os
 import re
 from langdetect import detect
 from utils import extract_text_from_pdf, compute_offer
 
-# ✅ 加载 API Key
-load_dotenv()
+# ✅ 解决代理冲突问题
+os.environ["NO_PROXY"] = "api.openai.com" 
+
+# ✅ 安全加载环境变量
+load_dotenv()  
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # ✅ Streamlit 页面设置
-st.set_page_config(page_title="AI Hiring Assistant", layout="centered")
+st.set_page_config(page_title="AI Hiring Assistant", layout="centered",initial_sidebar_state="collapsed")
 st.title("🤖 AI Hiring Assistant")
 st.markdown("**Position:** Data Analyst  **Salary Range:** Up to $90,000")
 
