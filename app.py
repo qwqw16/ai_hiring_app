@@ -1,19 +1,17 @@
 import streamlit as st
 from dotenv import load_dotenv
-from openai import OpenAI
+import openai
 import os
 import re
 from langdetect import detect
 from utils import extract_text_from_pdf, compute_offer
 
-# ✅ 解决代理冲突问题
-os.environ["NO_PROXY"] = "api.openai.com" 
-
 # ✅ 安全加载环境变量
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+load_dotenv()
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 # ✅ Streamlit 页面设置
-st.set_page_config(page_title="AI Hiring Assistant", layout="centered",initial_sidebar_state="collapsed")
+st.set_page_config(page_title="AI Hiring Assistant", layout="centered", initial_sidebar_state="collapsed")
 st.title("🤖 AI Hiring Assistant")
 st.markdown("**Position:** Data Analyst  **Salary Range:** Up to $90,000")
 
@@ -34,7 +32,7 @@ if uploaded_file:
     # ✅ 简历评分
     st.markdown("### 🔍 Resume Match Score")
     with st.spinner("AI is evaluating..."):
-        response = client.chat.completions.create(
+        response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are a professional recruiter."},
@@ -52,10 +50,8 @@ Resume Content (in {lang_label}):
 """}
             ]
         )
-        score_text = response.choices[0].message.content.strip()
+        score_text = response.choices[0].message["content"].strip()
         st.write(score_text)
-
-
 
     match = re.search(r'\b(10|[1-9])\b', score_text[:30])
     match_score = int(match.group(1)) if match else st.slider("❓ Score not detected. Select manually:", 1, 10)
@@ -67,14 +63,14 @@ Resume Content (in {lang_label}):
         st.success("🎉 Resume passed! Proceeding to the interview...")
 
         # ✅ 生成面试问题
-        response_q = client.chat.completions.create(
+        response_q = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are a recruiter."},
                 {"role": "user", "content": f"Please generate 2 interview questions in English based on this resume (written in {lang_label}):\n\n{resume_text}"}
             ]
         )
-        questions = response_q.choices[0].message.content
+        questions = response_q.choices[0].message["content"]
         st.markdown("### 📋 Interview Questions")
         st.write(questions)
 
@@ -83,7 +79,7 @@ Resume Content (in {lang_label}):
 
         if st.button("Submit Answer") and "eval_done" not in st.session_state:
             with st.spinner("AI is scoring your response..."):
-                eval_response = client.chat.completions.create(
+                eval_response = openai.ChatCompletion.create(
                     model="gpt-3.5-turbo",
                     messages=[
                         {"role": "system", "content": "You are an interview evaluator."},
@@ -97,7 +93,7 @@ Candidate's Answer:
 """}
                     ]
                 )
-                eval_text = eval_response.choices[0].message.content.strip()
+                eval_text = eval_response.choices[0].message["content"].strip()
                 st.session_state["eval_text"] = eval_text
 
                 eval_match = re.search(r'\b(10|[1-9])\b', eval_text[:30])
